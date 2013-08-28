@@ -7,6 +7,7 @@
 class Surface
 {
 	private:
+		float m_reflectionIndex = 0;
 		Color m_diffuseColor;
 		Color m_specularColor;
 
@@ -16,6 +17,8 @@ class Surface
 		void SetDiffuseColor(Color color) { m_diffuseColor = color; }
 		Color GetDiffuseColor() { return m_diffuseColor; }
 		void SetSpecularColor(Color color) { m_specularColor = color; }
+		void SetReflectionIndex(float r) { m_reflectionIndex = r; }
+		float GetReflectionIndex() { return m_reflectionIndex; }
 };
 
 #endif

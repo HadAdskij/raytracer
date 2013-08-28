@@ -5,6 +5,7 @@
 #include "View.h"
 #include "Plane.h"
 #include "Sphere.h"
+#include "Cylinder.h"
 
 float t = 1.1, curtime;
 int width = 512, height = 512, curframes;
@@ -15,14 +16,19 @@ Light l;
 void PrepareView() {
 	pixels = (Color*)malloc(width*height*sizeof(Color));
 
-	view = new View(width, height, Ray(Vector3(-1, 5, 0), Vector3(1, -5, 0)));
+	view = new View(width, height, Ray(Vector3(-3,0.5,0), Vector3(3, 0.5, 0)));
 
 	// Scene objects
-	Sphere* esfera1 = new Sphere(Vector3(2, 0, -1), 1), *esfera2 = new Sphere(Vector3(3, 0, 0.25), 1);
+	Sphere* esfera1 = new Sphere(Vector3(2, 0, -1), 1), *esfera2 = new Sphere(Vector3(3, 0, 1), 1);
+	esfera1->SetReflectionIndex(0.6); esfera2->SetReflectionIndex(0.6);
 	esfera1->SetDiffuseColor(Color(0,0.7,0.7)); esfera2->SetDiffuseColor(Color(0,0,0.7));
+	Cylinder* cilindro = new Cylinder(Ray(Vector3(4, 2, 0), Vector3(-1,0,1)), 0.25);
+	cilindro->SetDiffuseColor(Color(0,1,0)); cilindro->SetReflectionIndex(0.6);
 
-	Plane* chao = new Plane(Vector3(0,-1,0), Vector3(0,1,0)); chao->SetDiffuseColor(Color(1,0,0));
+	Plane* chao = new Plane(Vector3(0,-1,0), Vector3(0,1,0)); chao->SetDiffuseColor(Color(0.6,0.6,0.6));
+	chao->SetReflectionIndex(1);
 	view->AddSurface(esfera1); view->AddSurface(esfera2); view->AddSurface(chao);
+	view->AddSurface(cilindro);
 
 	// Scene lights
 	l = Light(Vector3(0,0,0), 0.5);
@@ -33,8 +39,12 @@ void DrawView () {
 
 	time_t tempo;
 	time(&tempo);
-	t += 0.1;
-	//l.position = Vector3(-2*cos(t), 2, -2*sin(t));
+	t += 0.01;
+	l.position = Vector3(-2*cos(1.1), 2, -2*sin(1.1));
+	Vector3 pos(-3*cos(t), 0.5, -3*sin(t));
+	Vector3 ppos = pos;
+	ppos.y = -ppos.y;
+	view->SetViewDirection(Ray(pos, ppos*(-1)), Vector3(0,1,0));
 
 	view->DrawScene(pixels);
 	glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
