@@ -28,13 +28,8 @@ Color View::GetPixelColor(int x, int y) {
 	float u = (-m_height + 2*x + 1.0f)/(2*m_height);
 	float v = (-m_width*m_width + m_width* (2*y + 1.0f) )/(2*m_width*m_height);
 
-	Color ret;
-	for(int i = 0; i <= 1; i++)
-		for(int j = 0; j <= 1; j++) {
-			float u0 = u + (2*i - 1.0f)/m_height;
-			float v0 = v + (2*j - 1.0f)/m_height;
-			ret = ret + RayColor(Ray(m_viewDirection.origin + m_viewDirection.direction + m_right*v0 + m_up*u0, m_viewDirection.direction + m_right*v0 + m_up*u0));
-	return ret/4;
+	Ray ray(m_viewDirection.origin + m_viewDirection.direction + m_right*v + m_up*u, m_viewDirection.direction + m_right*v + m_up*u);
+	return RayColor(ray);
 }
 
 bool View::Hit(Ray ray, int *outIndex, float *at, bool includeGlass) {
