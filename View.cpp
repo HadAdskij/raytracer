@@ -18,7 +18,7 @@ void View::SetViewDirection(Ray view, Vector3 up) {
 }
 
 void View::UpdatePixelParallel(int t, Color* pixels) {
-	int delta = m_height/8;
+	int delta = m_height/numThreads;
 	for(int i = t * delta; i < (t+1) * delta && i < m_height; i++)
 		for(int j = 0; j < m_width; j++)
 			pixels[i*m_width + j] = GetPixelColor(i, j);
@@ -32,11 +32,12 @@ Color View::GetPixelColor(int x, int y) {
 	return RayColor(ray);
 }
 
-bool View::Hit(Ray ray, int *outIndex, float *at) {
+bool View::Hit(Ray ray, int *outIndex, float *at, bool includeGlass) {
 	bool hit = false;
 	*outIndex = 0;
 	for(int i = 0; i < m_scene.size(); i++) {
 		float where;
+		if(!includeGlass && m_scene[i]->IsGlass()) continue;
 		if(m_scene[i]->Intersects(ray, 0.001, *at, &where)) {
 			hit = true;
 			*outIndex = i;
@@ -48,18 +49,17 @@ bool View::Hit(Ray ray, int *outIndex, float *at) {
 
 Color View::RayColor(Ray ray, int depth) {
 
-	Color ret = Color(0,0,0);
-
-	if(depth == 2) return ret;
+	if(depth == 2) return Color(0,0,0);
 
 	// Calculate lights
 	
 	int surfaceHit;
 	float at = 1.0f/0.0f;;
 	if(Hit(ray, &surfaceHit, &at)) {
-		// Ambient light
+		Color ret = Color(0,0,0);
 		Surface* surface = m_scene[surfaceHit];
-		ret = surface->GetDiffuseColor() * 0.1;
+		if(surface->IsGlass())
+			return RayColor(surface->GetRefractedRay(ray, at),  depth);
 
 		for(int i = 0; i < m_lights.size(); i++) {
 			Vector3 surfacePoint = ray.origin + ray.direction * at;
@@ -79,7 +79,7 @@ Color View::RayColor(Ray ray, int depth) {
 			float nl = normal * lightDir;
 			float nh = normal * h;
 
-			if(!Hit(Ray(surfacePoint, lightDir), &sHit, &at))
+			if(!Hit(Ray(surfacePoint, lightDir), &sHit, &at, false))
 				ret = ret + surface->GetDiffuseColor()*m_lights[i]->intensity*std::max(0.0f, nl) + Color(0.4,0.4,0.4) * m_lights[i]->intensity * pow(std::max(0.0f, nh), 1000);
 			
 			float reflection = surface->GetReflectionIndex();
@@ -87,7 +87,9 @@ Color View::RayColor(Ray ray, int depth) {
 				ret = ret + RayColor(Ray(surfacePoint, normal * (viewDir * normal) * 2 - viewDir), depth+1) * reflection;
 			}
 		}
+		return ret;
 	}
 
-	return ret;
+	// Ambient light
+	return Color(0.55, 0.75, 0.84);
 }

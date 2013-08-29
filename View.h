@@ -9,7 +9,7 @@
 
 class View {
 	private:
-		int numThreads = 8;
+		int numThreads = 1;
 		Vector3 m_up, m_right;
 		std::vector<Surface*> m_scene;
 		std::vector<Light*> m_lights;
@@ -17,7 +17,7 @@ class View {
 		Ray m_viewDirection;
 		Color GetPixelColor(int x, int y);
 		Color RayColor(Ray r, int depth = 0);
-		bool Hit(Ray r, int *surfaceHit, float *at);
+		bool Hit(Ray r, int *surfaceHit, float *at, bool includeGlass = true);
 		std::thread* pixelThread;
 
 	public:

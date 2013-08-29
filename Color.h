@@ -14,6 +14,10 @@ struct Color {
 	Color operator + (const Color &c) {
 		return Color(r + c.r, g + c.g, b + c.b);
 	}
+
+	Color operator - (const Color &c) {
+		return Color(r - c.r, g - c.g, b - c.b);
+	}
 };
 
 #endif
