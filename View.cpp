@@ -91,5 +91,6 @@ Color View::RayColor(Ray ray, int depth) {
 	}
 
 	// Ambient light
-	return Color(0.55, 0.75, 0.84);
+	return Color(0,0,0);
+	//return Color(0.55, 0.75, 0.84);
 }
