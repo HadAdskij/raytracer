@@ -1,6 +1,7 @@
-#include <stdio.h>
-#include <algorithm>
+#include <cstdio>
 #include <cmath>
+#include <algorithm>
+#include <limits>
 #include "View.h"
 
 void View::DrawScene(Color* pixels) {
@@ -35,10 +36,10 @@ Color View::GetPixelColor(int x, int y) {
 bool View::Hit(Ray ray, int *outIndex, float *at, bool includeGlass) {
 	bool hit = false;
 	*outIndex = 0;
-	for(int i = 0; i < m_scene.size(); i++) {
+	for(size_t i = 0; i < m_scene.size(); i++) {
 		float where;
 		if(!includeGlass && m_scene[i]->IsGlass()) continue;
-		if(m_scene[i]->Intersects(ray, 0.001, *at, &where)) {
+		if(m_scene[i]->Intersects(ray, 0.001f, *at, &where)) {
 			hit = true;
 			*outIndex = i;
 			*at = where;
@@ -49,23 +50,23 @@ bool View::Hit(Ray ray, int *outIndex, float *at, bool includeGlass) {
 
 Color View::RayColor(Ray ray, int depth) {
 
-	if(depth == 2) return Color(0,0,0);
+	if(depth == 2) return Color(0.2,0.2,0.2);
 
 	// Calculate lights
 	
 	int surfaceHit;
-	float at = 1.0f/0.0f;;
+	float at = std::numeric_limits<float>::infinity();
 	if(Hit(ray, &surfaceHit, &at)) {
 		Color ret = Color(0,0,0);
-		Surface* surface = m_scene[surfaceHit];
-		if(surface->IsGlass())
-			return RayColor(surface->GetRefractedRay(ray, at),  depth);
+		const Surface& surface = *m_scene[surfaceHit];
+		if(surface.IsGlass())
+			return RayColor(surface.GetRefractedRay(ray, at),  depth);
 
-		for(int i = 0; i < m_lights.size(); i++) {
+		for(size_t i = 0; i < m_lights.size(); i++) {
 			Vector3 surfacePoint = ray.origin + ray.direction * at;
 			Vector3 lightDir = m_lights[i]->position - surfacePoint;
 			Vector3 viewDir = m_viewDirection.origin - surfacePoint;
-			Vector3 normal = surface->Normal(surfacePoint);
+			Vector3 normal = surface.Normal(surfacePoint);
 			lightDir.Normalize();
 			viewDir.Normalize();
 
@@ -80,9 +81,11 @@ Color View::RayColor(Ray ray, int depth) {
 			float nh = normal * h;
 
 			if(!Hit(Ray(surfacePoint, lightDir), &sHit, &at, false))
-				ret = ret + surface->GetDiffuseColor()*m_lights[i]->intensity*std::max(0.0f, nl) + Color(0.4,0.4,0.4) * m_lights[i]->intensity * pow(std::max(0.0f, nh), 1000);
+				ret = ret +
+				      surface.GetDiffuseColor()*m_lights[i]->intensity*std::max(0.0f, nl) +
+					  Color(0.4f,0.4f,0.4f) * m_lights[i]->intensity * pow(std::max(0.0f, nh), 1000);
 			
-			float reflection = surface->GetReflectionIndex();
+			float reflection = surface.GetReflectionIndex();
 			if(reflection > 0) {
 				ret = ret + RayColor(Ray(surfacePoint, normal * (viewDir * normal) * 2 - viewDir), depth+1) * reflection;
 			}

@@ -4,7 +4,7 @@ Plane::Plane(Vector3 point, Vector3 normal) : m_point(point), m_normal(normal) {
 	m_normal.Normalize();
 }
 
-bool Plane::Intersects(Ray r, float begin, float end, float *where) {
+bool Plane::Intersects(Ray r, float begin, float end, float *where) const {
 	float vn = -(r.direction * m_normal);
 
 	if(vn == 0) {
@@ -16,6 +16,6 @@ bool Plane::Intersects(Ray r, float begin, float end, float *where) {
 	return (begin <= *where) && (*where <= end);
 }
 
-Vector3 Plane::Normal(Vector3) {
+Vector3 Plane::Normal(Vector3) const {
 	return m_normal;
 }

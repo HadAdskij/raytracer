@@ -5,7 +5,7 @@
 Sphere::Sphere(Vector3 center, float radius) : m_center(center), m_radius(radius) {
 }
 
-bool Sphere::Intersects(Ray r, float begin, float end, float* where) {
+bool Sphere::Intersects(Ray r, float begin, float end, float* where) const {
 	//printf("Tentando acertar esfera de raio %f em (%f, %f, %f) contra raio em (%f, %f, %f) e dir (%f,%f,%f)\n",
 	//		m_radius, m_center.x, m_center.y, m_center.z, r.origin.x, r.origin.y, r.origin.z, r.direction.x, r.direction.y, r.direction.z);
 	float a = r.direction.SquareNorm();
@@ -24,7 +24,7 @@ bool Sphere::Intersects(Ray r, float begin, float end, float* where) {
 	return false;
 }
 
-Vector3 Sphere::Normal(Vector3 at) {
+Vector3 Sphere::Normal(Vector3 at) const {
 	Vector3 ret = at - m_center;
 
 	ret.Normalize();

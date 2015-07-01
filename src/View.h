@@ -3,16 +3,17 @@
 
 #include <vector>
 #include <thread>
+#include <memory>
 #include "Surface.h"
 #include "Color.h"
 #include "Light.h"
 
 class View {
 	private:
-		int numThreads = 1;
+		int numThreads;
 		Vector3 m_up, m_right;
-		std::vector<Surface*> m_scene;
-		std::vector<Light*> m_lights;
+		std::vector<std::shared_ptr<Light> > m_lights;
+		std::vector<std::shared_ptr<Surface> > m_scene;
 		int m_width, m_height; // In pixels
 		Ray m_viewDirection;
 		Color GetPixelColor(int x, int y);
@@ -21,7 +22,8 @@ class View {
 		std::thread* pixelThread;
 
 	public:
-		View(int width, int height, Ray viewDirection) : m_width(width), m_height(height), m_viewDirection (viewDirection) {
+		View() {}
+		View(int width, int height, Ray viewDirection) : numThreads(1), m_width(width), m_height(height), m_viewDirection (viewDirection) {
 			Vector3 up = Vector3(0,1,0);
 			m_right = viewDirection.direction.Cross(up);
 			m_right.Normalize();
@@ -30,8 +32,8 @@ class View {
 		}
 		void SetViewDirection(Ray view, Vector3 up);
 		void UpdatePixelParallel(int t, Color* pixels);
-		void AddSurface(Surface* surface) { m_scene.push_back(surface); }
-		void AddLight(Light* light) { m_lights.push_back(light); }
+		void AddSurface(std::shared_ptr<Surface> surface) { m_scene.push_back(surface); }
+		void AddLight(std::shared_ptr<Light> light) { m_lights.push_back(light); }
 		void DrawScene(Color* outPixels);
 };
 

@@ -7,15 +7,15 @@ struct Color {
 	Color() {};
 	Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
-	Color operator * (const float t) {
+	Color operator * (const float t) const {
 		return Color(t*r, t*g, t*b);
 	}
 
-	Color operator + (const Color &c) {
+	Color operator + (const Color &c) const {
 		return Color(r + c.r, g + c.g, b + c.b);
 	}
 
-	Color operator - (const Color &c) {
+	Color operator - (const Color &c) const {
 		return Color(r - c.r, g - c.g, b - c.b);
 	}
 };
